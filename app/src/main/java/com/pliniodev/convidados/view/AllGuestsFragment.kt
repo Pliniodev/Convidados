@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -15,12 +14,11 @@ import com.pliniodev.convidados.R
 import com.pliniodev.convidados.service.constants.GuestConstants
 import com.pliniodev.convidados.view.adapter.GuestAdapter
 import com.pliniodev.convidados.view.listener.GuestListener
-import com.pliniodev.convidados.viewmodel.AllGuestsViewModel
-import kotlinx.android.synthetic.main.fragment_all.*
+import com.pliniodev.convidados.viewmodel.GuestsViewModel
 
 class AllGuestsFragment : Fragment() {
 
-    private lateinit var allGuestsViewModel: AllGuestsViewModel
+    private lateinit var mViewModel: GuestsViewModel
     private val mAdapter: GuestAdapter = GuestAdapter()
     private lateinit var mListener: GuestListener
 
@@ -29,7 +27,7 @@ class AllGuestsFragment : Fragment() {
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        allGuestsViewModel = ViewModelProvider(this).get(AllGuestsViewModel::class.java)
+        mViewModel = ViewModelProvider(this).get(GuestsViewModel::class.java)
 
         val root = inflater.inflate(R.layout.fragment_all, container, false)
 
@@ -56,6 +54,11 @@ class AllGuestsFragment : Fragment() {
                 intent.putExtras(bundle)
                 startActivity(intent)
             }
+
+            override fun onDelete(id: Int) {
+                mViewModel.delete(id)
+                mViewModel.load(GuestConstants.FILTER.EMPTY)
+            }
         }
 
         mAdapter.attachListener(mListener)
@@ -67,13 +70,13 @@ class AllGuestsFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        allGuestsViewModel.load()
+        mViewModel.load(GuestConstants.FILTER.EMPTY)
     }
 
     //para o contexto foi utilizado o viewLifeCycleOwner que faz o mesmo papel do contexto
     //isso é necessário devido a utilização do fragment
     private fun observer() {
-        allGuestsViewModel.guestList.observe(viewLifecycleOwner, Observer {
+        mViewModel.guestList.observe(viewLifecycleOwner, Observer {
             mAdapter.updateGuests(it)
         })
     }
