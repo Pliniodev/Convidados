@@ -8,11 +8,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.pliniodev.convidados.viewmodel.GuestFormViewModel
 import com.pliniodev.convidados.R
+import com.pliniodev.convidados.service.constants.GuestConstants
 import kotlinx.android.synthetic.main.activity_guest_form.*
 
 class GuestFormActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var mViewModel: GuestFormViewModel
+    private var mGuestId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,9 +22,20 @@ class GuestFormActivity : AppCompatActivity(), View.OnClickListener {
 
         mViewModel = ViewModelProvider(this).get(GuestFormViewModel::class.java)
 
+
         setListeners()
         observe()
+        loadData()
 
+        radio_presence.isChecked = true // valor default
+    }
+
+    private fun loadData() {
+        val bundle = intent.extras
+        if (bundle != null) {
+            mGuestId = bundle.getInt(GuestConstants.GUESTID)
+            mViewModel.load(mGuestId)
+        }
     }
 
     override fun onClick(v: View) {
@@ -31,7 +44,9 @@ class GuestFormActivity : AppCompatActivity(), View.OnClickListener {
             val name = edit_name.text.toString()
             val presence = radio_presence.isChecked
 
-            mViewModel.save(name, presence)
+            //Lembrete : lógicas de negócio devem sempre estar na view model
+
+            mViewModel.save(mGuestId, name, presence)
         }
     }
 
@@ -44,6 +59,15 @@ class GuestFormActivity : AppCompatActivity(), View.OnClickListener {
                 Toast.makeText(applicationContext, "Falha!", Toast.LENGTH_SHORT).show()
             }
             finish()
+        })
+
+        mViewModel.guest.observe(this, Observer {
+            edit_name.setText(it.name)
+            if(it.presence) {
+                radio_presence.isChecked = true
+            } else {
+                radio_absent.isChecked = true
+            }
         })
     }
 
