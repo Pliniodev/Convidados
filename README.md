@@ -1,6 +1,6 @@
 # Convidados
 
-Aplicativo de Estudo
+Aplicativo de Estudo - Possui comentários para minha própria prática
 
 Neste app foram aplicados os seguintes conceitos e tecnologias
 
